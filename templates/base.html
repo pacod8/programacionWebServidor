@@ -14,13 +14,13 @@
           <a class="navbar-brand" href="/">U-TAD</a>
         </div>
         <ul class="nav navbar-nav">
-        
-        
+
+
         {% if current_user.is_authenticated %}
               <li class={% if module=='home' %}"active"{%else%}""{%endif%}><a href="/">Home</a></li>
-              
+
               {% if current_user.profile in ('admin','staff','student') %}
-                  <li class={% if module=='module001' %}"active"{%else%}""{%endif%}><a href="/module001">Module 1</a></li>
+                  <li class={% if module=='module001' %}"active"{%else%}""{%endif%}><a href="/course">Course</a></li>
                   <li class={% if module=='module002' %}"active"{%else%}""{%endif%}><a href="/module002">Module 2</a></li>
               {% endif %}
 
@@ -30,17 +30,17 @@
               {% if current_user.profile in ('admin') %}
                   <li><a href="/admin">Admin</a></li>
               {% endif %}
-              <li> <a href={{url_for('logout')}}>Logout</a></li> 
- 
+              <li> <a href={{url_for('logout')}}>Logout</a></li>
+
         {% else %}
               <li class={% if module=='home' %}"active"{%else%}""{%endif%}><a href="/">Home</a></li>
               <li class={% if module=='login' %}"active"{%else%}""{%endif%}><a href={{url_for('login')}}>Login</a></li>
               <li class={% if module=='signup' %}"active"{%else%}""{%endif%}><a href={{url_for('signup')}}>Sign Up</a></li>
         {% endif %}
-       
+
         </ul>
       </div>
-    </nav>  
+    </nav>
 
     <div class="container">
         {% for message in get_flashed_messages() %}
@@ -50,6 +50,6 @@
         {% endfor%}
     </div>
 
-    {% block content %} {% endblock %} 
+    {% block content %} {% endblock %}
 </body>
 

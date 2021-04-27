@@ -32,6 +32,26 @@ class User(UserMixin,db.Model): # User extends db.Model
     date_created  = db.Column(db.DateTime,  default=db.func.current_timestamp())
     date_modified = db.Column(db.DateTime,  default=db.func.current_timestamp(),
                                        onupdate=db.func.current_timestamp())
+    course = db.relationship('Course', backref='user', lazy=True)
 
+class Course(UserMixin,db.Model): # User extends db.Model
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50))
+    institution_name = db.Column(db.String(50))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    code = db.Column(db.String(50),unique=True)
+    date_created  = db.Column(db.DateTime,  default=db.func.current_timestamp())
+    date_modified = db.Column(db.DateTime,  default=db.func.current_timestamp(),
+                                       onupdate=db.func.current_timestamp())
+    follow = db.relationship('Follow', backref='course', lazy=True)
 
-
+class Follow(UserMixin,db.Model): # User extends db.Model
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=False)
+    course_name = db.Column(db.String(50))
+    course_code = db.Column(db.String(50))
+    institution_name = db.Column(db.String(50))
+    date_created  = db.Column(db.DateTime,  default=db.func.current_timestamp())
+    date_modified = db.Column(db.DateTime,  default=db.func.current_timestamp(),
+                                       onupdate=db.func.current_timestamp())

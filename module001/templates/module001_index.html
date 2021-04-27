@@ -1,6 +1,11 @@
 {% extends 'base.html' %}
+{% import "bootstrap/wtf.html" as wtf %}
 
 {% block content %}
-	<h1> Module001 - v2 </h1>
-	Hola {{ user.username }}
+    <nav class="navbar navbar-default">
+        <ul class="nav navbar-nav">
+              <li><a href={{url_for('module001.module001_index')}}>Course</a></li>
+              <li><a href={{url_for('module001.module001_course')}}>Create</a></li>
+        </ul>
+    </nav>
 {% endblock %}
