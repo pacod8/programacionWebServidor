@@ -1,0 +1,7 @@
+User {{user.username}} has been created.
+Please copy the following url into any web navigator to validate your email: http://{{base_url}}/confirmuser/{{user.username}}/{{user.userhash}}
+
+----
+
+Usario {{ user.username }} ha sido creado.
+Por favor ingresar la siguiente url en el navegador de web para validar su email: http://{{base_url}}/confirmuser/{{user.username}}/{{user.userhash}}
