@@ -13,5 +13,53 @@
 
        <button class="btn btn-lg btn-primary btn-block" type="submit"> Create or Update library </button>
        </form>
+
+    <br>
+      <div class="table-responsive">
+        <table id="myTable" class="table table-striped">
+          <thead>
+            <tr>
+              <th>Edit</th>
+              <th>Grades</th>
+              <th>Share Code</th>
+              <th>Institution Name</th>
+              <th>User id</th>
+              <th>Date Created</th>
+              <th>Date Modified</th>
+
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in rows %}
+            <tr>
+               <td> <a><form action="{{url_for('module001.module001_course')}}" method="GET">
+                   <input type="submit" value={{ row.id }} name="rowid">
+               </form> </a></td>
+
+               <td> <a><form action="" method="GET">
+                   <input type="hidden" value={{ row.id }} name="rowid">
+                   <input type="submit" value={{ row.name }} name="coursename">
+               </form> </a></td>
+
+               <td> <a><form action="" method="GET">
+                   <input type="hidden" value={{ row.id }} name="rowid">
+                   <input type="hidden" value="course" name="itemtype">
+                   <input type="submit" value={{ row.code }} name="code">
+               </form> </a></td>
+
+                <td>{{ row.institution_name }}</td>
+
+                <td> <a><form action="/profile" method="GET">
+                   <input type="submit" value={{ row.user_id }} name="rowid">
+               </form> </a></td>
+                <td>{{ row.date_created }}</td>
+                <td>{{ row.date_modified }}</td>
+
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
+
 {% endblock %}

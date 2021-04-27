@@ -36,8 +36,17 @@ def module001_course():
                     course.name = newname + '-' + course.code
                 db.session.commit()
                 flash("Course created successfully with code: {}".format(course.code))
+            else: # EJERCICIO - IMPLEMENTAR EL UPDATE DE institution_name y name - HASTA LAS 13:25
+                pass
+    elif ('rowid' in request.args):
+        course = Course.query.get(request.args['rowid'])
+        if not course or course.user_id != current_user.id:
+            flash('Error retrieving data for the course {}'.format(request.args['rowid']))
+        else:
+            form = CourseForm(id=course.id, name=course.name.replace('-' + course.code,''), institution_name = course.institution_name, code=course.code)
 
-    return render_template("module001_course.html",module="module001", form=form)
+    courses = Course.query.filter_by(user_id=current_user.id)
+    return render_template("module001_course.html",module="module001", form=form, rows=courses)
 
 @module001.route('/test')
 def module001_test():
