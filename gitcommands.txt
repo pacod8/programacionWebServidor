@@ -1,0 +1,20 @@
+nano .gitignore   
+__pycache__
+*.swp
+*.sqlite
+
+
+
+cd ~/aulavirtual/
+git init
+git config --global push.default simple
+git add * 
+git add .gitignore
+git status
+git config --global user.email "XXXXXXXXXX@XXXXXX.com"  
+git config --global user.name "XXXXXXXXXXXXX"     
+git config --global credential.helper cache
+git config --global credential.helper 'cache --timeout=604800'    
+git commit -m "carga inicial"       
+git remote add origin https://github.com/XXXXXXXXXX/aulavirtual.git
+git push -u origin master
