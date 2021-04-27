@@ -34,10 +34,36 @@ def module001_course():
                 newname = form.name.data.strip().replace('-' + course.code,'')
                 if '-' + course.code not in newname:
                     course.name = newname + '-' + course.code
-                db.session.commit()
-                flash("Course created successfully with code: {}".format(course.code))
-            else: # EJERCICIO - IMPLEMENTAR EL UPDATE DE institution_name y name - HASTA LAS 13:25
-                pass
+                try:
+                    db.session.commit()
+                    flash("Course created successfully with code: {}".format(course.code))
+                except:
+                    db.session.rollback()
+                    flash("Error creating course!")
+            else:
+                change = 0
+                course = Course.query.get(form.id.data)
+                newcoursename = form.name.data.strip().replace('-' + course.code,'') + '-' + course.code
+                if course.name != newcoursename:
+                    course.name = newcoursename
+                    change = 1
+
+                newinstitutionname = form.institution_name.data.strip()
+                if course.institution_name != newinstitutionname:
+                    course.institution_name = newinstitutionname
+                    change = 1
+
+                try:
+                    if change:
+                        db.session.commit()
+                        flash("Course  updated successfully!")
+                    else:
+                        flash("Nothing has changed!")
+                except:
+                    db.session.rollback()
+                    flash("Error updating course!")
+                return redirect(url_for('module001.module001_course'))
+
     elif ('rowid' in request.args):
         course = Course.query.get(request.args['rowid'])
         if not course or course.user_id != current_user.id:
