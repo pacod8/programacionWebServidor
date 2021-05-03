@@ -1,0 +1,10 @@
+{
+    "mysql_password": "aaaaaaa",
+    "gmail_password": "mraefqctekigsvva",
+    "gmail_username": "playmarketemailer@gmail.com",
+    "mysql_hostname": "aaaaaaa.mysql.pythonanywhere-services.com",
+    "mysql_username": "aaaaaaa",
+    "SECRET_KEY": "aaaaaaa",
+    "mysql_databasename": "aaaaaaa$fintech",
+    "MODE":"development"
+ }

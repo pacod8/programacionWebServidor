@@ -5,7 +5,7 @@ import json
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
 
-with open('../configuration.json') as json_file:
+with open('./configuration.json') as json_file:
     configuration = json.load(json_file)
 
 from application import init_app

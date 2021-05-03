@@ -57,8 +57,9 @@ def signup():
                 send_email(newuser.email,'Please, confirm email / Por favor, confirmar correo.','mail/new_user',user=newuser,url=request.host, newpassword=password_hashed)
                 flash("Great, your user was created successfully please visit your email {} to confirm your email / Muy bien, ahora visite su correo electrónico {} para confirmar el correo.".format(newuser.email,newuser.email))
                 return redirect(url_for('login'))
-            except:
+            except Exception as e:
                 db.session.rollback()
+                print(e.message)
                 flash("Error creating user!")
     return render_template('signup.html',module="signup", form=form)
 # CONTROLLER - END
