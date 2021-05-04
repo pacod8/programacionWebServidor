@@ -80,29 +80,30 @@ from qrcode import QRCode, ERROR_CORRECT_L
 @login_required
 def sharing_details():
     qr = QRCode(version=20, error_correction=ERROR_CORRECT_L)
-
+    base_url=request.host
     if request.args.get('itemtype') == 'course':
         course = Course.query.get(request.args.get('rowid'))
         if not course or course.user_id != current_user.id:
             flash("An error has occurred retrieving details for the activity")
             return redirect(url_for('library'))
-        qr.add_data("http://attendance.pythonanywhere.com/follow?sharedlink=1&code={}".format(course.code))
+        qr.add_data("http://{}/follow?sharedlink=1&code={}".format(base_url,course.code))
         module,itemtype,item="library","course",course
 #    else:
 #        participation = ParticipationCode.query.get(request.args.get('rowid'))
 #        if not participation or participation.user_id != current_user.id:
 #            flash("An error has occurred retrieving details for the participation")
 #            return redirect(url_for('participation_generate'))
-#        qr.add_data("http://attendance.pythonanywhere.com/participation_redeem?sharedlink=1&code={}".format(participation.code))
+#        qr.add_data("http://{}/participation_redeem?sharedlink=1&code={}".format(base_url,participation.code))
 #        module,itemtype,item="participation_gerenate","participation",participation
-    try:
-        qr.make() # Generate the QRCode itself
-        im = qr.make_image()
-        filename = "./static/qrcodes/{}.png".format(item.code)
-        im.save(filename)
-        return render_template('module001_sharing_details.html',module=module, item=item, itemtype=itemtype,filename=filename,baseurl=request.host)
-    except:
-        return render_template('module001_sharing_details.html',module=module, item=item, itemtype=itemtype,base_url=request.host)
+#    try:
+    qr.make() # Generate the QRCode itself
+    im = qr.make_image()
+    filename = "./static/qrcodes/{}.png".format(item.code)
+    urlfilename = "http://{}/static/qrcodes/{}.png".format(base_url,item.code)
+    im.save(filename)
+    return render_template('module001_sharing_details.html',module=module, item=item, itemtype=itemtype,filename=urlfilename,base_url=base_url)
+#    except:
+#        return render_template('module001_sharing_details.html',module=module, item=item, itemtype=itemtype,base_url=request.host)
 
 
 
