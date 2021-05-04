@@ -1,5 +1,17 @@
 {% extends 'base.html' %}
+{% import "bootstrap/wtf.html" as wtf %}
 
-{% block content %} 
-	<h1> Module003 - v2 </h1>
-{% endblock %} 
+{% block content %}
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+          <ul class="nav nav-sidebar">
+              <li><a href={{url_for('module003.module003_index')}}>Home</a></li>
+              <li><a href={{url_for('module003.module003_tasks')}}>Create</a></li>
+              <li><a href={{url_for('module003.module003_attempt')}}>Attempt</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+	{% block main %} {% endblock %}
+{% endblock %}
