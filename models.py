@@ -29,6 +29,7 @@ class User(UserMixin,db.Model): # User extends db.Model
     profile = db.Column(db.String(10),default='student') # 'admin', 'staff', 'professor', 'student'
     confirmed = db.Column(db.Boolean(),default=False)
     userhash = db.Column(db.String(50))
+
     date_created  = db.Column(db.DateTime,  default=db.func.current_timestamp())
     date_modified = db.Column(db.DateTime,  default=db.func.current_timestamp(),
                                        onupdate=db.func.current_timestamp())
@@ -40,6 +41,7 @@ class Course(UserMixin,db.Model): # User extends db.Model
     institution_name = db.Column(db.String(50))
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     code = db.Column(db.String(50),unique=True)
+
     date_created  = db.Column(db.DateTime,  default=db.func.current_timestamp())
     date_modified = db.Column(db.DateTime,  default=db.func.current_timestamp(),
                                        onupdate=db.func.current_timestamp())
@@ -52,6 +54,7 @@ class Follow(UserMixin,db.Model): # User extends db.Model
     course_name = db.Column(db.String(50))
     course_code = db.Column(db.String(50))
     institution_name = db.Column(db.String(50))
+
     date_created  = db.Column(db.DateTime,  default=db.func.current_timestamp())
     date_modified = db.Column(db.DateTime,  default=db.func.current_timestamp(),
                                        onupdate=db.func.current_timestamp())
@@ -67,6 +70,7 @@ class ParticipationCode(UserMixin,db.Model): # User extends db.Model
     course_name = db.Column(db.String(50))
     institution_name = db.Column(db.String(50))
     date_expire = db.Column(db.DateTime)
+
     date_created  = db.Column(db.DateTime,  default=db.func.current_timestamp())
     date_modified = db.Column(db.DateTime,  default=db.func.current_timestamp(),
                                        onupdate=db.func.current_timestamp())
@@ -79,8 +83,34 @@ class ParticipationRedeem(UserMixin,db.Model): # User extends db.Model
     course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=False)
     course_name = db.Column(db.String(50))
     institution_name = db.Column(db.String(50))
+
     date_created  = db.Column(db.DateTime,  default=db.func.current_timestamp())
     date_modified = db.Column(db.DateTime,  default=db.func.current_timestamp(),
                                        onupdate=db.func.current_timestamp())
 
+class CourseTasks(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=False)
+    name = db.Column(db.String(50))
+    description = db.Column(db.String(4000))
+    date_limit  = db.Column(db.DateTime, nullable=False)
 
+    date_created  = db.Column(db.DateTime,  default=db.func.current_timestamp())
+    date_modified = db.Column(db.DateTime,  default=db.func.current_timestamp(),
+                                       onupdate=db.func.current_timestamp())
+
+class CourseTaskAttemps(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    task_id = db.Column(db.Integer, db.ForeignKey('course_tasks.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    comments = db.Column(db.String(4000))
+    attachment = db.Column(db.Integer, db.ForeignKey('user_file.id'))
+    grade = db.Column(db.Float)
+    date_created  = db.Column(db.DateTime,  default=db.func.current_timestamp())
+    date_modified = db.Column(db.DateTime,  default=db.func.current_timestamp(),
+                                       onupdate=db.func.current_timestamp())
+
+class UserFile(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    filetype = db.Column(db.String(50))
+    filename = db.Column(db.String(50))

@@ -25,7 +25,7 @@
               {% endif %}
 
               {% if current_user.profile in ('admin','staff','professor') %}
-                  <li class={% if module=='module003' %}"active"{%else%}""{%endif%}><a href="/module003">Module 3</a></li>
+                  <li class={% if module=='module003' %}"active"{%else%}""{%endif%}><a href="/module003">Tasks</a></li>
               {% endif %}
               {% if current_user.profile in ('admin') %}
                   <li><a href="/admin">Admin</a></li>

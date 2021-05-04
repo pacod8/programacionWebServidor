@@ -39,7 +39,8 @@ app.config['MAIL_USERNAME'] = configuration['gmail_username']
 app.config['MAIL_PASSWORD'] = configuration['gmail_password']
 app.config['FLASKY_MAIL_SUBJECT_PREFIX'] = '[Aula Virtual] '
 app.config['FLASKY_MAIL_SENDER'] = 'Prof. Manoel Gadi'
-
+app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
+app.config['UPLOAD_EXTENSIONS'] = ['.zip', '.pdf', '.doc', '.docx', '.png', '.jpg']
 
 from mail import init_mail
 mail = init_mail(app)
