@@ -1,7 +1,17 @@
-{% extends 'base.html' %}
-{% import "bootstrap/wtf.html" as wtf %}
+{% extends 'module001_base.html' %}
 
 {% block content %}
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+          <ul class="nav nav-sidebar">
+              <li><a href={{url_for('module001.module001_index')}}>Course</a></li>
+              <li><a href={{url_for('module001.module001_course')}}>Create</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
     <div class="container">
       <form class="form-signin" method="POST" action="{{url_for('module001.module001_course')}}">
         <h2 class="form-signin-heading"> Course / Institution </h2>
@@ -41,7 +51,7 @@
                    <input type="submit" value={{ row.name }} name="coursename">
                </form> </a></td>
 
-               <td> <a><form action="" method="GET">
+               <td> <a><form action="{{url_for('module001.sharing_details')}}" method="GET">
                    <input type="hidden" value={{ row.id }} name="rowid">
                    <input type="hidden" value="course" name="itemtype">
                    <input type="submit" value={{ row.code }} name="code">
