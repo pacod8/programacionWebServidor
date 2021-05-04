@@ -79,9 +79,12 @@ def module003_tasks():
             form = TaskForm(id=task.id, name=task.name, description=task.description, course_id= task.course_id, date_limit=task.date_limit)
 
     courses = Course.query.filter_by(user_id=current_user.id).all()
-    tasks = CourseTasks.query.filter(CourseTasks.id.in_(list(map(lambda x: x.id, courses))))
+    tasks = CourseTasks.query.filter(CourseTasks.id.in_(list(map(lambda x: x.id, courses)))).order_by(CourseTasks.course_id).all()
     for course in Course.query.filter_by(user_id=current_user.id):
         form.course_id.choices += [(course.id,  str(course.id) + ' - ' + course.institution_name + ' - ' + course.name)]
+    for t in tasks:
+        course = list(filter(lambda x: x.id == t.course_id, courses))[0]
+        t.course_name = str(course.id) + ' - ' + course.institution_name + ' - ' + course.name
     return render_template("module003_tasks.html",module="module003", form=form, rows=tasks)
 
 

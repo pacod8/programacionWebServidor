@@ -20,10 +20,11 @@
           <thead>
             <tr>
               <th>Edit</th>
-              <th>Grades</th>
-              <th>Share Code</th>
-              <th>Institution Name</th>
-              <th>User id</th>
+              <th>Course</th>
+              <th>Name</th>
+              <th>Description</th>
+              <th>Date Limit</th>
+              <th>Attempts</th>
               <th>Date Created</th>
               <th>Date Modified</th>
 
@@ -35,23 +36,21 @@
                <td> <a><form action="{{url_for('module003.module003_tasks')}}" method="GET">
                    <input type="submit" value={{ row.id }} name="rowid">
                </form> </a></td>
-
+               <td><a><form action="/course/course" method="GET">
+                <input type="hidden" value={{ row.course_id }} name="rowid">
+                <input type="submit" value="{{ row.course_name }}" name="taskcourse">
+                </form> </a></td>
                <td> <a><form action="" method="GET">
                    <input type="hidden" value={{ row.id }} name="rowid">
-                   <input type="submit" value={{ row.name }} name="coursename">
+                   <input type="submit" value={{ row.name }} name="taskname">
                </form> </a></td>
+                <td>{{ row.description }}</td>
 
-               <td> <a><form action="{{url_for('module001.module001_sharing_details')}}" method="GET">
-                   <input type="hidden" value={{ row.id }} name="rowid">
-                   <input type="hidden" value="course" name="itemtype">
-                   <input type="submit" value={{ row.code }} name="code">
-               </form> </a></td>
-
-                <td>{{ row.institution_name }}</td>
-
-                <td> <a><form action="/profile" method="GET">
-                   <input type="submit" value={{ row.user_id }} name="rowid">
-               </form> </a></td>
+                <td>{{ row.date_limit }}</td>
+                <td><a><form action="" method="GET">
+                  <input type="hidden" value={{ row.id }} name="rowid">
+                  <input type="submit" value="View Attempts" name="taskattempts">
+                </form> </a></td>
                 <td>{{ row.date_created }}</td>
                 <td>{{ row.date_modified }}</td>
 
