@@ -3,7 +3,7 @@
 {% block main %}
     <div class="container">
       <form class="form-signin" method="POST" action="{{url_for('module003.module003_tasks')}}">
-        <h2 class="form-signin-heading"> Course / Institution </h2>
+        <h2 class="form-signin-heading"> Tasks </h2>
         {{ form.hidden_tag() }}
     	{{ wtf.form_field(form.id,readonly="readonly") }}
     	{{ wtf.form_field(form.name) }}
