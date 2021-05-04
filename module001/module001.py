@@ -1,5 +1,6 @@
 from flask import Blueprint, render_template, abort, flash, redirect, url_for, request
 from flask_login import login_required, current_user
+from sqlalchemy import or_, and_
 from models import get_db, Course, Follow
 import random
 
@@ -85,7 +86,7 @@ def sharing_details():
         course = Course.query.get(request.args.get('rowid'))
         if not course or course.user_id != current_user.id:
             flash("An error has occurred retrieving details for the activity")
-            return redirect(url_for('library'))
+            return redirect(url_for('module001.module001_course'))
         qr.add_data("http://{}/follow?sharedlink=1&code={}".format(base_url,course.code))
         module,itemtype,item="library","course",course
 #    else:
@@ -108,17 +109,64 @@ def sharing_details():
 
 @module001.route('/follow',methods=['GET','POST'])
 @login_required
-def follow():
+def module001_follow():
     form = FollowForm()
     unfollow=False
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            course_code = form.code.data
+            follow = Follow.query.filter(and_(Follow.course_code==form.code.data,
+                                              Follow.user_id==current_user.id)).first()
+            if follow:
+                flash("You are already following the course {} ".format(course_code))
+            else:
+                course = Course.query.filter_by(code=form.code.data).first()
+                if not course:
+                    flash('The code {} is invalid, try again with the correct code.'.format(form.code.data))
+                else:
+                    follow = Follow(user_id=current_user.id,
+                                    course_id=course.id,
+                                    course_code=course.code,
+                                    course_name=course.name,
+                                    institution_name = course.institution_name)
+                    try:
+                        db.session.add(follow)
+                        db.session.commit()
+                        flash("You are now following {}".format(course.name))
+                    except:
+                        db.session.rollback()
+                        flash("Error following!")
+    elif ('sharedlink' in request.args):
+        form=FollowForm(code=request.args.get('code'))
+
     follows = Follow.query.filter_by(user_id=current_user.id)
     return render_template('module001_follow.html',module="follow", form=form, rows=follows, unfollow=unfollow)
 
 @module001.route('/unfollow',methods=['GET','POST'])
 @login_required
-def unfollow():
-    flash("Unfollow!")
-    return redirect(url_for('index'))
+def module001_unfollow():
+    form = FollowForm()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            course_code = form.code.data
+            follow = Follow.query.filter(and_(Follow.course_code==form.code.data,
+                                              Follow.user_id==current_user.id)).first()
+            if follow:
+                try:
+                    db.session.delete(follow)
+                    db.session.commit()
+                    flash("You are not following {} any longer".format(course_code))
+                    return redirect(url_for('module001.module001_follow'))
+                except:
+                    db.session.rollback()
+                    flash("Error unfollowing!")
+        flash('Something unusual happened, please try again later')
+    else:
+        form=FollowForm(code=request.args.get('code'))
+    unfollow=True
+    follows = Follow.query.filter_by(user_id=current_user.id)
+
+    return render_template('module001_follow.html',module="follow", form=form, rows=follows, unfollow=unfollow)
 
 @module001.route('/test')
 def module001_test():
