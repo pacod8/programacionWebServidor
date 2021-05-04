@@ -1,0 +1,10 @@
+{
+    "mysql_password": "",
+    "gmail_password": "",
+    "gmail_username": "",
+    "mysql_hostname": "",
+    "mysql_username": "",
+    "SECRET_KEY": "",
+    "mysql_databasename": "",
+    "MODE":"development"
+ }
