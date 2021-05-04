@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block content %}
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+          <ul class="nav nav-sidebar">
+              <li><a href={{url_for('module001.module001_index')}}>Home</a></li>
+              <li><a href={{url_for('module001.module001_course')}}>Create</a></li>
+              <li><a href={{url_for('module001.module001_follow')}}>Following</a></li>
+              <li><a href={{url_for('module001.module001_participation_generate')}}>Participation</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+<div class="container">
+
+       <form class="form-signin" method="POST" action="{{url_for('module001.module001_participation_generate')}}">
+        {{ form.hidden_tag() }}
+    	{{ wtf.form_field(form.id,readonly="readonly") }}
+    	{{ wtf.form_field(form.code,readonly="readonly") }}
+    	{{ wtf.form_field(form.code_description) }}
+    	{{ wtf.form_field(form.course_id) }}
+    	{{ wtf.form_field(form.code_type) }}
+    	{{ wtf.form_field(form.never_expire) }}
+    	{{ wtf.form_field(form.date_expire) }}
+    	{{ wtf.form_field(form.time_expire) }}
+
+        <button class="btn btn-lg btn-primary btn-block" type="submit"> Create or Update Participation Point </button>
+       </form>
+
+        <br>
+          <div class="table-responsive">
+            <table id="myTable" class="table table-striped">
+              <thead>
+                <tr>
+                  <th>All</th>
+
+                  <th>Edit</th>
+                  <th>Share Participation Code</th>
+                  <th>Description</th>
+                  <th>Code Type</th>
+                  <th>Course Name</th>
+                  <th>Institution Name</th>
+                  <th>Expiring Date</th>
+                  <th>Date Created</th>
+                  <th>Date Modified</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in rows %}
+                <tr>
+
+                   <td> <a><form action="{{url_for('module001.module001_participation_generate')}}" method="GET">
+                       <input type="hidden" value={{ row.id }} name="rowid">
+                       <input type="hidden" value="redeems" name="redeems">
+                       <input type="submit" value="+" name="+">
+                   </form> </a></td>
+
+                   <td> <a><form action="{{url_for('module001.module001_participation_generate')}}" method="GET">
+                       <input type="submit" value={{ row.id }} name="rowid">
+                   </form> </a></td>
+
+                   <td> <a><form action="{{url_for('module001.module001_sharing_details')}}" method="GET">
+                       <input type="hidden" value={{ row.id }} name="rowid">
+                       <input type="hidden" value="participation" name="itemtype">
+                       <input type="submit" value={{ row.code }} name="code">
+                   </form> </a></td>
+                    <td>{{ row.code_description }}</td>
+                    <td>{{ row.code_type }}</td>
+                    <td>{{ row.course_name }}</td>
+                    <td>{{ row.institution_name }}</td>
+
+                    <td>{{ row.date_expire }}</td>
+                    <td>{{ row.date_created }}</td>
+                    <td>{{ row.date_modified }}</td>
+
+
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+    </div>
+
+    <script>
+            //$("#never_expire").hide();
+/*			$(document).ready( // run after the document is loaded
+				function(){ // anonymous function
+                    $("#never_expired").click(function() {
+                        $("#never_expire").hide()
+                    })
+				}
+			)
+*/
+            $(document).ready(function() {
+                //set initial state.
+
+                $('#never_expired').change(function() {
+                    if(this.checked) {
+                        var returnVal = confirm("Are you sure?");
+                        $(this).prop("checked", returnVal);
+                    }
+                });
+            });
+    </script>
+
+{% endblock %}

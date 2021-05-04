@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block content %}
+
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+          <ul class="nav nav-sidebar">
+              <li><a href={{url_for('module001.module001_index')}}>Home</a></li>
+              <li><a href={{url_for('module001.module001_course')}}>Create</a></li>
+              <li><a href={{url_for('module001.module001_follow')}}>Following</a></li>
+              <li><a href={{url_for('module001.module001_participation_generate')}}>Participation</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="container">
+
+
+        {% if unfollow %}
+           <form class="form-signin" method="POST" action="{{url_for('module001.module001_unfollow')}}">
+            {{ form.hidden_tag() }}
+        	{{ wtf.form_field(form.code) }}
+             <button class="btn btn-lg btn-warning btn-block" type="submit">Unfollow</button>
+           </form>
+          </form>
+        {% else %}
+           <form class="form-signin" method="POST" action="{{url_for('module001.module001_follow')}}">
+            {{ form.hidden_tag() }}
+        	{{ wtf.form_field(form.code) }}
+            <button class="btn btn-lg btn-primary btn-block" type="submit"> Follow </button>
+           </form>
+        {% endif %}
+
+
+        <br>
+          <div class="table-responsive">
+            <table id="myTable" class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Edit</th>
+                  <th>Course Name</th>
+                  <th>Course Code</th>
+                  <th>Institution Name</th>
+                  <th>User id</th>
+                  <th>Date Created</th>
+                  <th>Date Modified</th>
+
+                </tr>
+              </thead>
+              <tbody>
+                {% for row in rows %}
+                <tr>
+
+                   <td> <a><form action="{{url_for('module001.module001_unfollow')}}" method="GET">
+                       <input type="submit" value={{ row.course_code }} name="code">
+                   </form> </a></td>
+
+                    <td>{{ row.course_name }}</td>
+                    <td>{{ row.course_code }}</td>
+                    <td>{{ row.institution_name }}</td>
+
+                    <td> <a><form action="/profile" method="GET">
+                       <input type="submit" value={{ row.user_id }} name="rowid">
+                   </form> </a></td>
+                    <td>{{ row.date_created }}</td>
+                    <td>{{ row.date_modified }}</td>
+
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+
+    </div>
+{% endblock %}

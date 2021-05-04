@@ -55,3 +55,32 @@ class Follow(UserMixin,db.Model): # User extends db.Model
     date_created  = db.Column(db.DateTime,  default=db.func.current_timestamp())
     date_modified = db.Column(db.DateTime,  default=db.func.current_timestamp(),
                                        onupdate=db.func.current_timestamp())
+
+
+class ParticipationCode(UserMixin,db.Model): # User extends db.Model
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(50))
+    code_description = db.Column(db.String(120))
+    code_type = db.Column(db.String(50))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=False)
+    course_name = db.Column(db.String(50))
+    institution_name = db.Column(db.String(50))
+    date_expire = db.Column(db.DateTime)
+    date_created  = db.Column(db.DateTime,  default=db.func.current_timestamp())
+    date_modified = db.Column(db.DateTime,  default=db.func.current_timestamp(),
+                                       onupdate=db.func.current_timestamp())
+
+class ParticipationRedeem(UserMixin,db.Model): # User extends db.Model
+    id = db.Column(db.Integer, primary_key=True)
+    participation_code = db.Column(db.String(50))
+    code_description = db.Column(db.String(120))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    course_id = db.Column(db.Integer, db.ForeignKey('course.id'), nullable=False)
+    course_name = db.Column(db.String(50))
+    institution_name = db.Column(db.String(50))
+    date_created  = db.Column(db.DateTime,  default=db.func.current_timestamp())
+    date_modified = db.Column(db.DateTime,  default=db.func.current_timestamp(),
+                                       onupdate=db.func.current_timestamp())
+
+

@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% import "bootstrap/wtf.html" as wtf %}
+
+{% block content %}
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+          <ul class="nav nav-sidebar">
+              <li><a href={{url_for('module001.module001_index')}}>Home</a></li>
+              <li><a href={{url_for('module001.module001_course')}}>Create</a></li>
+              <li><a href={{url_for('module001.module001_follow')}}>Following</a></li>
+              <li><a href={{url_for('module001.module001_participation_generate')}}>Participation</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="container">
+        {% if itemtype == "course" %}
+            <h1> Joinning details: </h1>
+            <h2> {{ item.name }} </h2>
+             <ul>
+              <li>Code: {{ item.code }}
+              (join by entering the code here: <a href="http://{{base_url}}/course/follow" target="_blank">http://{{base_url}}/course/follow</a>)</li>
+              <li>Direct link: <a href="http://{{base_url}}/course/follow?sharedlink=1&code={{item.code}}" target="_blank">http://{{base_url}}/course/follow?sharedlink=1&code={{ item.code }}</a></li>
+              {% if filename %}
+                  <li><img  src={{filename}} alt="" style="width: 40%; height: auto;"></li>
+              {% endif %}
+
+            </ul>
+        {% elif itemtype == "participation" %}
+            <h1> Redeeming details: </h1>
+            <h2> {{ item.code_description }} </h2>
+             <ul>
+              <li>Code: {{ item.code }}
+              (redeem by entering the code here: <a href="http://{{base_url}}/participation_redeem" target="_blank">http://{{base_url}}/participation_redeem</a>)</li>
+              <li>Direct link: <a href="http://{{base_url}}/participation_redeem?sharedlink=1&code={{item.code}}" target="_blank">http://{{base_url}}/participation_redeem?sharedlink=1&code={{ item.code }}</a></li>
+              {% if filename %}
+                  <li><img  src={{filename}} alt="" style="width: 40%; height: auto;"></li>
+              {% endif %}
+            </ul>
+        {% endif %}
+
+    </div>
+{% endblock %}

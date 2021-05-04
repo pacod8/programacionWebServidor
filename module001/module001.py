@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, abort, flash, redirect, url_for, request
 from flask_login import login_required, current_user
-from models import get_db, Course
+from sqlalchemy import or_, and_
+from models import get_db, User, Course, Follow, ParticipationCode, ParticipationRedeem
 import random
 
 from module001.forms import *
@@ -74,6 +75,230 @@ def module001_course():
     courses = Course.query.filter_by(user_id=current_user.id)
     return render_template("module001_course.html",module="module001", form=form, rows=courses)
 
+
+from qrcode import QRCode, ERROR_CORRECT_L
+@module001.route('/sharing_details',methods=['GET','POST'])
+@login_required
+def module001_sharing_details():
+    qr = QRCode(version=20, error_correction=ERROR_CORRECT_L)
+    base_url=request.host
+    if request.args.get('itemtype') == 'course':
+        course = Course.query.get(request.args.get('rowid'))
+        if not course or course.user_id != current_user.id:
+            flash("An error has occurred retrieving details for the activity")
+            return redirect(url_for('module001.module001_course'))
+        qr.add_data("http://{}/follow?sharedlink=1&code={}".format(base_url,course.code))
+        module,itemtype,item="library","course",course
+#    else:
+#        participation = ParticipationCode.query.get(request.args.get('rowid'))
+#        if not participation or participation.user_id != current_user.id:
+#            flash("An error has occurred retrieving details for the participation")
+#            return redirect(url_for('module001.module001_participation_generate'))
+#        qr.add_data("http://{}/participation_redeem?sharedlink=1&code={}".format(base_url,participation.code))
+#        module,itemtype,item="participation_gerenate","participation",participation
+    try:
+        qr.make() # Generate the QRCode itself
+        im = qr.make_image()
+        filename = "./static/qrcodes/{}.png".format(item.code)
+        urlfilename = "http://{}/static/qrcodes/{}.png".format(base_url,item.code)
+        im.save(filename)
+        return render_template('module001_sharing_details.html',module="module001", item=item, itemtype=itemtype,filename=urlfilename,base_url=base_url)
+    except:
+        return render_template('module001_sharing_details.html',module="module001", item=item, itemtype=itemtype,base_url=base_url)
+
+
+@module001.route('/follow',methods=['GET','POST'])
+@login_required
+def module001_follow():
+    form = FollowForm()
+    unfollow=False
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            course_code = form.code.data
+            follow = Follow.query.filter(and_(Follow.course_code==form.code.data,
+                                              Follow.user_id==current_user.id)).first()
+            if follow:
+                flash("You are already following the course {} ".format(course_code))
+            else:
+                course = Course.query.filter_by(code=form.code.data).first()
+                if not course:
+                    flash('The code {} is invalid, try again with the correct code.'.format(form.code.data))
+                else:
+                    follow = Follow(user_id=current_user.id,
+                                    course_id=course.id,
+                                    course_code=course.code,
+                                    course_name=course.name,
+                                    institution_name = course.institution_name)
+                    try:
+                        db.session.add(follow)
+                        db.session.commit()
+                        flash("You are now following {}".format(course.name))
+                    except:
+                        db.session.rollback()
+                        flash("Error following!")
+    elif ('sharedlink' in request.args):
+        form=FollowForm(code=request.args.get('code'))
+
+    follows = Follow.query.filter_by(user_id=current_user.id)
+    return render_template('module001_follow.html',module="module001", form=form, rows=follows, unfollow=unfollow)
+
+@module001.route('/unfollow',methods=['GET','POST'])
+@login_required
+def module001_unfollow():
+    form = FollowForm()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            course_code = form.code.data
+            follow = Follow.query.filter(and_(Follow.course_code==form.code.data,
+                                              Follow.user_id==current_user.id)).first()
+            if follow:
+                try:
+                    db.session.delete(follow)
+                    db.session.commit()
+                    flash("You are not following {} any longer".format(course_code))
+                    return redirect(url_for('module001.module001_follow'))
+                except:
+                    db.session.rollback()
+                    flash("Error unfollowing!")
+        flash('Something unusual happened, please try again later')
+    else:
+        form=FollowForm(code=request.args.get('code'))
+    unfollow=True
+    follows = Follow.query.filter_by(user_id=current_user.id)
+
+    return render_template('module001_follow.html',module="module001", form=form, rows=follows, unfollow=unfollow)
+
+
+@module001.route('/participation_generate',methods=['GET','POST'])
+@login_required
+def module001_participation_generate():
+    form = ParticipationCodeForm()
+    if request.method == 'POST':
+        try:
+            if not form.id.data:
+                course = Course.query.get(form.course_id.data)
+                while(True):
+                    participation_code = 'P'+str(form.course_id.data)+''.join(random.choice('AILNOQVBCDEFGHJKMPRSTUXZ') for i in range(4))
+                    participation = ParticipationCode.query.filter_by(code=participation_code).first()
+                    if not participation:
+                        break
+                if course:
+                    if form.never_expire.data:
+                        participation = ParticipationCode(
+                                code = participation_code,
+                                code_description =  form.code_description.data,
+                                code_type = form.code_type.data,
+                                user_id = current_user.id,
+                                course_id = course.id,
+                                course_name = course.name,
+                                institution_name = course.institution_name)
+                    else:
+                        participation = ParticipationCode(
+                                code = participation_code,
+                                code_description =  form.code_description.data,
+                                code_type = form.code_type.data,
+                                user_id = current_user.id,
+                                course_id = course.id,
+                                course_name = course.name,
+                                institution_name = course.institution_name,
+                                date_expire=datetime.datetime.combine(form.date_expire.data, form.time_expire.data))
+                    db.session.add(participation)
+                    db.session.commit()
+                    flash("Participation code {} created successfully".format(participation.code))
+                else:
+                    flash("Error selecting course")
+                return redirect(url_for('module001.module001_participation_generate'))
+            else:
+#                flash("date_expire={} / time_expire={}".format(type(form.date_expire.data),type(form.time_expire.data)))
+#                flash("Date time combined={}".format(datetime.datetime.combine(form.date_expire.data, form.time_expire.data)))
+#                return redirect(url_for('module001.module001_participation_generate'))
+                course = Course.query.get(int(form.course_id.data))
+                participation = ParticipationCode.query.get(form.id.data)
+
+                newname = form.code_description.data.strip()
+                if course.institution_name != newname:
+                    oldname = participation.code_description
+                    db.session.query(ParticipationRedeem).filter(ParticipationRedeem.code_description==oldname).update({ParticipationRedeem.code_description:newname}, synchronize_session=False)
+
+                if course:
+                    participation.code_description =  form.code_description.data
+                    participation.code_type = form.code_type.data
+                    participation.course_id = form.course_id.data
+                    participation.course_name = course.name
+                    participation.institution_name = course.institution_name
+                    if form.never_expire.data:
+                        participation.date_expire=None
+                    else:
+                        participation.date_expire=datetime.datetime.combine(form.date_expire.data, form.time_expire.data)
+                else:
+                    participation.code_description =  form.code_description.data
+                    participation.code_type = form.code_type.data
+                    participation.user_id = current_user.id
+                    participation.course_id = 0
+                    participation.course_name = 'all'
+                    participation.institution_name = 'all'
+                    if form.never_expire.data:
+                        participation.date_expire=None
+                    else:
+                        participation.date_expire=datetime.datetime.combine(form.date_expire.data, form.time_expire.data)
+                db.session.commit()
+                flash("Participation code {} updated successfully".format(participation.code))
+                return redirect(url_for('module001.module001_participation_generate'))
+        except:
+            db.session.rollback()
+            flash("Error creating / updating participation!")
+
+
+#    elif ('redeems' in request.args) and ('rowid' in request.args):
+#        participation = ParticipationCode.query.get(request.args.get('rowid'))
+#        participations = ParticipationRedeem.query.filter(ParticipationRedeem.participation_code == participation.code)
+#        rows = [(User.query.filter_by(id=item.user_id).first(), item.date_created, item.date_modified) for item in participations]
+#        return render_template('participation_redeem_dashboad.html',module="participation_generate", form=form, rows=rows, participation_code=participation.code)
+    elif ('coursename' in request.args) and ('rowid' in request.args):
+        form = ParticipationCodeForm(course_id=request.args.get('rowid'))
+    elif ('rowid' in request.args):
+        participation = ParticipationCode.query.get(request.args.get('rowid'))
+        form = ParticipationCodeForm(id=participation.id,
+                                     code_description = participation.code_description,
+                                     code=participation.code,
+                                     course_id=participation.course_id,
+                                     code_type=participation.code_type,
+                                     never_expire=(participation.date_expire == None),
+                                     date_expire=participation.date_expire,
+                                     time_expire=participation.date_expire)
+    else:
+        form = ParticipationCodeForm(course_id=0)
+
+
+    participations = ParticipationCode.query.filter(ParticipationCode.user_id==current_user.id)
+
+    for course in Course.query.filter_by(user_id=current_user.id):
+        form.course_id.choices += [(course.id,  str(course.id) + ' - ' + course.institution_name + ' - ' + course.name)]
+    return render_template('module001_participation_generate.html',module="module001", form=form, rows=participations)
+
+
+
 @module001.route('/test')
 def module001_test():
     return 'OK'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
