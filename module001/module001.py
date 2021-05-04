@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, abort, flash, redirect, url_for, request
 from flask_login import login_required, current_user
-from models import get_db, Course
+from models import get_db, Course, Follow
 import random
 
 from module001.forms import *
@@ -95,17 +95,30 @@ def sharing_details():
 #            return redirect(url_for('participation_generate'))
 #        qr.add_data("http://{}/participation_redeem?sharedlink=1&code={}".format(base_url,participation.code))
 #        module,itemtype,item="participation_gerenate","participation",participation
-#    try:
-    qr.make() # Generate the QRCode itself
-    im = qr.make_image()
-    filename = "./static/qrcodes/{}.png".format(item.code)
-    urlfilename = "http://{}/static/qrcodes/{}.png".format(base_url,item.code)
-    im.save(filename)
-    return render_template('module001_sharing_details.html',module=module, item=item, itemtype=itemtype,filename=urlfilename,base_url=base_url)
-#    except:
-#        return render_template('module001_sharing_details.html',module=module, item=item, itemtype=itemtype,base_url=request.host)
+    try:
+        qr.make() # Generate the QRCode itself
+        im = qr.make_image()
+        filename = "./static/qrcodes/{}.png".format(item.code)
+        urlfilename = "http://{}/static/qrcodes/{}.png".format(base_url,item.code)
+        im.save(filename)
+        return render_template('module001_sharing_details.html',module=module, item=item, itemtype=itemtype,filename=urlfilename,base_url=base_url)
+    except:
+        return render_template('module001_sharing_details.html',module=module, item=item, itemtype=itemtype,base_url=base_url)
 
 
+@module001.route('/follow',methods=['GET','POST'])
+@login_required
+def follow():
+    form = FollowForm()
+    unfollow=False
+    follows = Follow.query.filter_by(user_id=current_user.id)
+    return render_template('module001_follow.html',module="follow", form=form, rows=follows, unfollow=unfollow)
+
+@module001.route('/unfollow',methods=['GET','POST'])
+@login_required
+def unfollow():
+    flash("Unfollow!")
+    return redirect(url_for('index'))
 
 @module001.route('/test')
 def module001_test():

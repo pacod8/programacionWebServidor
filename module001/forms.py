@@ -7,3 +7,8 @@ class CourseForm(FlaskForm): # class RegisterForm extends FlaskForm
     name = StringField('Course Name',validators=[InputRequired(),Length(min=1,max=50)])
     institution_name = StringField('Institution Name')
     code = StringField('Course Code')
+
+class FollowForm(FlaskForm): # class RegisterForm extends FlaskForm
+    code = StringField('Enter the course code you wish to follow / unfollow:',validators=[InputRequired(),Length(min=1,max=50)])
+
+

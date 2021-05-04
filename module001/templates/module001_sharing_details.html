@@ -9,8 +9,8 @@
             <h2> {{ item.name }} </h2>
              <ul>
               <li>Code: {{ item.code }}
-              (join by entering the code here: <a href="http://{{base_url}}/follow" target="_blank">http://{{base_url}}/follow</a>)</li>
-              <li>Direct link: <a href="http://{{base_url}}/follow?sharedlink=1&code={{item.code}}" target="_blank">http://{{base_url}}/follow?sharedlink=1&code={{ item.code }}</a></li>
+              (join by entering the code here: <a href="http://{{base_url}}/course/follow" target="_blank">http://{{base_url}}/course/follow</a>)</li>
+              <li>Direct link: <a href="http://{{base_url}}/course/follow?sharedlink=1&code={{item.code}}" target="_blank">http://{{base_url}}/course/follow?sharedlink=1&code={{ item.code }}</a></li>
               {% if filename %}
                   <li><img  src={{filename}} alt="" style="width: 40%; height: auto;"></li>
               {% endif %}
