@@ -59,7 +59,6 @@ def signup():
                 return redirect(url_for('login'))
             except Exception as e:
                 db.session.rollback()
-                print(e.message)
                 flash("Error creating user!")
     return render_template('signup.html',module="signup", form=form)
 # CONTROLLER - END
