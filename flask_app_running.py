@@ -19,7 +19,7 @@ from module003.module003 import module003
 
 app.register_blueprint(module001, url_prefix="/course")
 app.register_blueprint(module002, url_prefix="/module002")
-app.register_blueprint(module003, url_prefix="/module003")
+app.register_blueprint(module003, url_prefix="/tasks")
 
 # CONFIG- START
 app.config['SECRET_KEY'] = configuration['SECRET_KEY']

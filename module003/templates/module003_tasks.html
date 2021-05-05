@@ -47,10 +47,18 @@
                 <td>{{ row.description }}</td>
 
                 <td>{{ row.date_limit }}</td>
-                <td><a><form action="" method="GET">
-                  <input type="hidden" value={{ row.id }} name="rowid">
-                  <input type="submit" value="View Attempts" name="taskattempts">
+                {% if current_user.profile in ('admin', 'staff') %}
+                <td><a><form action="/tasks/attempt" method="POST">
+                  <input type="hidden" value={{ row.id }} name="task">
+                  <input type="submit" value="View Attempts">
                 </form> </a></td>
+                {% else %}
+                <td><a><form action="/tasks/attempt-detail" method="GET">
+                  <input type="hidden" value={{ row.id }} name="taskid">
+                  <input type="submit" value="My attempt" name="taskattempts">
+                </form> </a></td>
+                {% endif %}
+                
                 <td>{{ row.date_created }}</td>
                 <td>{{ row.date_modified }}</td>
 

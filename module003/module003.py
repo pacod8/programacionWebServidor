@@ -5,15 +5,18 @@ from models import get_db, User, Course, Follow, ParticipationCode, Participatio
 import random
 
 from module003.forms import *
+from helpers import role_required, role_not_allowed
 
 module003 = Blueprint("module003", __name__,static_folder="static",template_folder="templates")
 db = get_db()
 
 @module003.route('/')
+@login_required
 def module003_index():
     return render_template("module003_index.html", module='module003')
 
-@module003.route('/tasks' ,methods=['GET', 'POST'])
+@module003.route('/tasks', methods=['GET', 'POST'])
+@login_required
 def module003_tasks():
     form = TaskForm()
     courses = Course.query.filter_by(user_id=current_user.id).all()
@@ -82,12 +85,60 @@ def module003_tasks():
     tasks = CourseTasks.query.filter(CourseTasks.id.in_(list(map(lambda x: x.id, courses)))).order_by(CourseTasks.course_id).all()
     for course in Course.query.filter_by(user_id=current_user.id):
         form.course_id.choices += [(course.id,  str(course.id) + ' - ' + course.institution_name + ' - ' + course.name)]
-    for t in tasks:
-        course = list(filter(lambda x: x.id == t.course_id, courses))[0]
-        t.course_name = str(course.id) + ' - ' + course.institution_name + ' - ' + course.name
+    if len(courses) != 0:
+        print(courses)
+        for t in tasks:
+            course = list(filter(lambda x: x.id == t.course_id, courses))[0]
+            t.course_name = str(course.id) + ' - ' + course.institution_name + ' - ' + course.name
     return render_template("module003_tasks.html",module="module003", form=form, rows=tasks)
 
-
-@module003.route('/attempt')
+@module003.route('/attempt', methods=['GET', 'POST'])
+@login_required
 def module003_attempt():
-    return render_template("module003_attempt.html", module='module003')
+    filter_form = TaskAttemptFilterForm()
+    courses = Course.query.filter_by(user_id=current_user.id).all()
+    filter_task = list(map(lambda x: x.id, courses))
+
+    tasks = CourseTasks.query.filter(CourseTasks.id.in_(filter_task))
+    for t in tasks:
+        filter_form.task.choices += [(t.id, t.name)]
+
+    if request.method == 'POST':
+        if filter_form.validate_on_submit():
+            filter_task = [filter_form.task.data] if int(filter_form.task.data) != -1 else filter_task
+
+    elif ('rowid' in request.args):
+        pass
+
+    attempts = CourseTaskAttemps.query.filter(CourseTaskAttemps.task_id.in_(filter_task))
+
+    for a in attempts:
+        task = list(filter(lambda x: x.id == t.course_id, tasks))[0]
+        a.task_name = task.name
+    return render_template("module003_attempt.html", module='module003', filter_form=filter_form, rows=attempts)
+
+
+@module003.route('/attempt-detail', methods=['GET', 'POST'])
+@login_required
+def module003_attempt_detail(): #TODO checar si la tarea esta en un curso que siga el usuario
+    filter_form = TaskAttemptFilterForm()
+    courses = Course.query.filter_by(user_id=current_user.id).all()
+    for course in Course.query.filter_by(user_id=current_user.id):
+        filter_form.course.choices += [(course.id,  str(course.id) + ' - ' + course.institution_name + ' - ' + course.name)]
+    filter_courses = list(map(lambda x: x.id, courses))
+
+    if request.method == 'POST':
+        filter_form.submit.data = True
+        if filter_form.validate_on_submit():
+            filter_courses = [filter_form.course.data] if int(filter_form.course.data) != -1 else filter_courses
+
+    elif ('rowid' in request.args):
+        task = CourseTaskAttemps.query.get(request.args['rowid'])
+        course = Course.query.filter_by(id=task.course_id).first()
+        if not task or not course or course.user_id != current_user.id:
+            flash('Error retrieving data for the task {}'.format(request.args['rowid']))
+        else:
+            form = TaskForm(id=task.id, name=task.name, description=task.description, course_id= task.course_id, date_limit=task.date_limit)
+    
+    print(filter_courses)
+    return render_template("module003_attempt_detail.html", module='module003', filter_form=filter_form)
