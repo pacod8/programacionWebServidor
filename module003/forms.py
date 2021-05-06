@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, BooleanField, DateTimeField, SelectField, HiddenField, TextAreaField, SubmitField, FileField #, DateField
 from wtforms.validators import InputRequired, Length, Optional
-from wtforms.fields.html5 import DateField, TimeField, DateTimeLocalField, DecimalRangeField
+from wtforms.fields.html5 import DateField, TimeField, DateTimeLocalField, DecimalField
 import datetime
 
 
@@ -23,4 +23,4 @@ class TaskAttemptForm(FlaskForm): # class RegisterForm extends FlaskForm
     user_id = StringField('user_id')
     comments = TextAreaField('Comments')
     attachment = FileField('Attachment', validators=[Optional()])
-    grade = DecimalRangeField('Grade', min=0, max=10)
+    grade = DecimalField('Grade', validators=[Length(min=0, max=10)], default=0)
