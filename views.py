@@ -1,11 +1,12 @@
 
 from application import get_app
 from flask_login import login_required, login_user, logout_user, current_user
-from flask import render_template, request, redirect, url_for, flash
+from flask import render_template, request, redirect, url_for, flash, send_file
 from sqlalchemy import or_
-from models import User, get_db
+from models import User, get_db, UserFile, Course, Follow
 from werkzeug.security import generate_password_hash, check_password_hash
 from mail import send_email
+import os
 app = get_app()
 db = get_db()
 
@@ -132,6 +133,25 @@ def logout():
 @login_required
 def dashboard():
     return render_template('dashboard.html',module="home")
+
+@app.route('/download-userfile')
+@login_required
+def download_userfile():
+    fileid = request.args['fileid']
+    file = UserFile.query.filter_by(id=fileid).first()
+    has_access = False
+
+    if(file.user_id == current_user.id):
+        has_access = True
+
+    query = db.session.query(User, Follow, Course).select_from(User).join(Follow).join(Course).all()
+    print(query)
+
+
+    if(has_access):
+        return send_file(os.path.join(app.config['UPLOADS_FOLDER'], file.filename),
+         mimetype=file.filetype, as_attachment=True, attachment_filename=file.filename)
+        
 
 
 @app.route('/')

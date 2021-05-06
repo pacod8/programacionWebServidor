@@ -100,15 +100,16 @@ def module003_tasks():
 def module003_attempt():
     filter_form = TaskAttemptFilterForm()
     courses = Course.query.filter_by(user_id=current_user.id).all()
-    filter_task = list(map(lambda x: x.id, courses))
+    filter_courses = list(map(lambda x: x.id, courses))
 
-    tasks = CourseTasks.query.filter(CourseTasks.id.in_(filter_task))
+    tasks = CourseTasks.query.filter(CourseTasks.course_id.in_(filter_courses))
+    filter_task = list(map(lambda x: x.id, tasks))
     for t in tasks:
         filter_form.task.choices += [(t.id, t.name)]
 
     if request.method == 'POST':
         if filter_form.validate_on_submit():
-            filter_task = [filter_form.task.data] if int(filter_form.task.data) != -1 else filter_task
+            filter_courses = [filter_form.task.data] if int(filter_form.task.data) != -1 else filter_task
 
     elif ('rowid' in request.args):
         pass
@@ -116,7 +117,7 @@ def module003_attempt():
     attempts = CourseTaskAttemps.query.filter(CourseTaskAttemps.task_id.in_(filter_task))
 
     for a in attempts:
-        task = list(filter(lambda x: x.id == t.course_id, tasks))[0]
+        task = list(filter(lambda x: x.id == a.task_id, tasks))[0]
         a.task_name = task.name
     return render_template("module003_attempt.html", module='module003', filter_form=filter_form, rows=attempts)
 
@@ -128,22 +129,32 @@ def module003_attempt_detail(): #TODO checar si la tarea esta en un curso que si
 
     if request.method == 'POST':
         if form.validate_on_submit():
-            f = form.attachment.data
-            filename = f.filename.split('.')
-            filename.insert(-1, str(uuid.uuid4().hex))
-            filename[0] = filename[0][:15]
-            filename = secure_filename('.'.join(filename))
-            f.save(os.path.join(current_app.config['UPLOADS_FOLDER'], filename))
-            filetype = f.mimetype
-            
-            fileatt = UserFile(filename=filename, filetype=filetype)
-            db.session.add(fileatt)
-            db.session.commit()
-            # TODO: checkear que todo es del usuario
-            attempt = CourseTaskAttemps(task_id=form.task_id.data, user_id=current_user.id,
-                comments=form.comments.data, attachment=fileatt.id, grade=form.grade.data)
+            fileatt = None
+            if (form.attachment.data):
+                f = form.attachment.data
+                filename = f.filename.split('.')
+                filename.insert(-1, str(uuid.uuid4().hex))
+                filename[0] = filename[0][:15]
+                filename = secure_filename('.'.join(filename))
+                f.save(os.path.join(current_app.config['UPLOADS_FOLDER'], filename))
+                filetype = f.mimetype
+                
+                fileatt = UserFile(filename=filename, filetype=filetype, user_id=current_user.id)
+                db.session.add(fileatt)
+                db.session.commit()
+            if(not form.id.data):
+                # TODO: checkear que todo es del usuario
+                attempt = CourseTaskAttemps(task_id=form.task_id.data, user_id=current_user.id,
+                    comments=form.comments.data, attachment=fileatt.id if fileatt else None, grade=form.grade.data)
+            else:
+                attempt = CourseTaskAttemps.query.get(form.id.data)
+                attempt.comments = form.comments.data
+                attempt.attachments = fileatt.id if fileatt else None
+                attempt.grade = form.grade.data
             db.session.add(attempt)
             db.session.commit()
+            task = CourseTasks.query.filter_by(id=form.task_id.data).first()
+            form.id.data = attempt.id
 
     elif ('taskid' in request.args):
         attempt = CourseTaskAttemps.query.filter_by(task_id=request.args['taskid']).first()
@@ -158,5 +169,8 @@ def module003_attempt_detail(): #TODO checar si la tarea esta en un curso que si
                 task_id= attempt.task_id, grade=attempt.grade)
             else:
                 form = TaskAttemptForm(user_id=current_user.id, task_id= task.id)
+    else:
+        return redirect(url_for('module003.module003_tasks'))
     
-    return render_template("module003_attempt_detail.html", module='module003', form=form, task_name=task.name)
+    return render_template("module003_attempt_detail.html", module='module003', form=form, task_name=task.name,
+        attachment_id=attempt.attachment if attempt else None)

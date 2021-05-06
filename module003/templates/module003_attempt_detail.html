@@ -12,8 +12,14 @@
         {{ wtf.form_field(form.attachment) }}
         {{ wtf.form_field(form.grade,readonly="readonly") }}
 
-       <button class="btn btn-lg btn-primary btn-block" type="submit"> Create or Update library </button>
+       <button class="btn btn-lg btn-primary btn-block" type="submit"> Create or Update attempt </button>
        </form>
+       {% if attachment_id %}
+       <form method="GET" action="/download-userfile">
+         <input type="hidden" value={{ attachment_id }} name="fileid">
+         <input type="submit" value="Download file">
+       </form>
+     {% endif %}
 
     <br>
     </div>
