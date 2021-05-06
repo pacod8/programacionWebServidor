@@ -41,6 +41,7 @@ app.config['FLASKY_MAIL_SUBJECT_PREFIX'] = '[Aula Virtual] '
 app.config['FLASKY_MAIL_SENDER'] = 'Prof. Manoel Gadi'
 app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
 app.config['UPLOAD_EXTENSIONS'] = ['.zip', '.pdf', '.doc', '.docx', '.png', '.jpg']
+app.config['UPLOADS_FOLDER'] = "uploads/"
 
 from mail import init_mail
 mail = init_mail(app)

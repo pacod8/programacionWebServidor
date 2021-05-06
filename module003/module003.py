@@ -1,8 +1,11 @@
-from flask import Blueprint, render_template, abort, flash, redirect, url_for, request
+from flask import Blueprint, render_template, abort, flash, redirect, url_for, request, current_app
 from flask_login import login_required, current_user
 from sqlalchemy import or_, and_
 from models import get_db, User, Course, Follow, ParticipationCode, ParticipationRedeem, CourseTasks, CourseTaskAttemps, UserFile
 import random
+from werkzeug.utils import secure_filename
+import os
+import uuid
 
 from module003.forms import *
 from helpers import role_required, role_not_allowed
@@ -124,7 +127,24 @@ def module003_attempt_detail(): #TODO checar si la tarea esta en un curso que si
     form = TaskAttemptForm()
 
     if request.method == 'POST':
-       pass
+        if form.validate_on_submit():
+            f = form.attachment.data
+            filename = f.filename.split('.')
+            filename.insert(-1, str(uuid.uuid4().hex))
+            filename[0] = filename[0][:15]
+            filename = secure_filename('.'.join(filename))
+            f.save(os.path.join(current_app.config['UPLOADS_FOLDER'], filename))
+            filetype = f.mimetype
+            
+            fileatt = UserFile(filename=filename, filetype=filetype)
+            db.session.add(fileatt)
+            db.session.commit()
+            # TODO: checkear que todo es del usuario
+            attempt = CourseTaskAttemps(task_id=form.task_id.data, user_id=current_user.id,
+                comments=form.comments.data, attachment=fileatt.id, grade=form.grade.data)
+            db.session.add(attempt)
+            db.session.commit()
+
     elif ('taskid' in request.args):
         attempt = CourseTaskAttemps.query.filter_by(task_id=request.args['taskid']).first()
         task = CourseTasks.query.filter_by(id=request.args['taskid']).first()
