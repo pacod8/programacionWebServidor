@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField
 from wtforms import StringField, BooleanField, DateTimeField, SelectField, HiddenField, TextAreaField, SubmitField #, DateField
-from wtforms.validators import InputRequired, Length, Optional
+from wtforms.validators import InputRequired, Length, Optional, ValidationError
 from wtforms.fields.html5 import DateField, TimeField, DateTimeLocalField, DecimalField
 import datetime
 
@@ -17,6 +17,15 @@ class TaskAttemptFilterForm(FlaskForm): # class RegisterForm extends FlaskForm
     task = SelectField('Task', choices = [(-1, "Todas las tareas")], validators = [InputRequired()], default=-1)
     submit = SubmitField('Filtrar')
 
+def grades_validator():
+    message = 'Must be between 0 and 10.'
+
+    def _validator(form, field):
+        l = field.data
+        if l < 0 or l > 10:
+            raise ValidationError(message)
+
+    return _validator
 
 class TaskAttemptForm(FlaskForm): # class RegisterForm extends FlaskForm
     id = StringField('id')
@@ -24,4 +33,4 @@ class TaskAttemptForm(FlaskForm): # class RegisterForm extends FlaskForm
     user_id = StringField('user_id')
     comments = TextAreaField('Comments')
     attachment = FileField('Attachment')
-    grade = DecimalField('Grade', validators=[Length(min=0, max=10)], default=0)
+    grade = DecimalField('Grade', validators=[grades_validator()])

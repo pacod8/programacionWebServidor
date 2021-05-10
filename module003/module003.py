@@ -18,16 +18,30 @@ db = get_db()
 def module003_index():
     return render_template("module003_index.html", module='module003')
 
+
+def get_user_courses(user):
+    if user.profile == 'staff':
+        courses = Course.query.all()
+    elif user.profile == 'admin':
+        courses = Course.query.filter_by(user_id=user.id).all()
+    else:
+        follows = map(lambda x: x.course_id, Follow.query.filter_by(user_id=user.id).all())
+        courses = Course.query.filter(Course.id.in_(follows)).all()
+    
+    return courses
+
+
 @module003.route('/tasks', methods=['GET', 'POST'])
 @login_required
 def module003_tasks():
     form = TaskForm()
-    courses = Course.query.filter_by(user_id=current_user.id).all()
-    tasks = CourseTasks.query.filter(CourseTasks.id.in_(list(map(lambda x: x.id, courses))))
-    for course in Course.query.filter_by(user_id=current_user.id):
+    courses = get_user_courses(current_user)
+    courses_ids = map(lambda x: x.id, courses)
+    #tasks = CourseTasks.query.filter(CourseTasks.course_id.in_(list(map(lambda x: x.id, courses))))
+    for course in courses:
         form.course_id.choices += [(course.id,  str(course.id) + ' - ' + course.institution_name + ' - ' + course.name)]
     
-    if request.method == 'POST':
+    if request.method == 'POST' and current_user.profile != 'student':
         if form.validate_on_submit():
             if not form.id.data:
                 task = CourseTasks(name=form.name.data.strip(),
@@ -79,27 +93,25 @@ def module003_tasks():
     elif ('rowid' in request.args):
         task = CourseTasks.query.get(request.args['rowid'])
         course = Course.query.filter_by(id=task.course_id).first()
-        if not task or not course or course.user_id != current_user.id:
+        if not task or not course or not task.course_id in courses_ids:
             flash('Error retrieving data for the task {}'.format(request.args['rowid']))
         else:
             form = TaskForm(id=task.id, name=task.name, description=task.description, course_id= task.course_id, date_limit=task.date_limit)
 
-    courses = Course.query.filter_by(user_id=current_user.id).all()
     tasks = CourseTasks.query.filter(CourseTasks.course_id.in_(list(map(lambda x: x.id, courses)))).order_by(CourseTasks.course_id).all()
-    for course in Course.query.filter_by(user_id=current_user.id):
-        form.course_id.choices += [(course.id,  str(course.id) + ' - ' + course.institution_name + ' - ' + course.name)]
     if len(courses) != 0:
-        print(courses)
         for t in tasks:
             course = list(filter(lambda x: x.id == t.course_id, courses))[0]
             t.course_name = str(course.id) + ' - ' + course.institution_name + ' - ' + course.name
     return render_template("module003_tasks.html",module="module003", form=form, rows=tasks)
 
+
 @module003.route('/attempt', methods=['GET', 'POST'])
 @login_required
 def module003_attempt():
     filter_form = TaskAttemptFilterForm()
-    courses = Course.query.filter_by(user_id=current_user.id).all()
+    courses = get_user_courses(current_user)
+    courses_ids = map(lambda x: x.id, courses)
     filter_courses = list(map(lambda x: x.id, courses))
 
     tasks = CourseTasks.query.filter(CourseTasks.course_id.in_(filter_courses))
@@ -126,6 +138,8 @@ def module003_attempt():
 @login_required
 def module003_attempt_detail(): #TODO checar si la tarea esta en un curso que siga el usuario
     form = TaskAttemptForm()
+    courses = get_user_courses(current_user)
+    courses_ids = map(lambda x: x.id, courses)
 
     if request.method == 'POST':
         if form.validate_on_submit():
@@ -143,25 +157,32 @@ def module003_attempt_detail(): #TODO checar si la tarea esta en un curso que si
                 db.session.add(fileatt)
                 db.session.commit()
             if(not form.id.data):
-                # TODO: checkear que todo es del usuario
+                task = CourseTasks.query.filter_by(id=form.task_id.data)
+                if not task or not task.course_id in courses_ids or current_user.profile != 'student':
+                    flash('Error updating attempt for task {}'.format(form.task_id.data))
+                    return redirect(url_for('module003.module003_attempts'))
+                
                 attempt = CourseTaskAttemps(task_id=form.task_id.data, user_id=current_user.id,
-                    comments=form.comments.data, attachment=fileatt.id if fileatt else None, grade=form.grade.data)
+                    comments=form.comments.data, attachment=fileatt.id if fileatt else None)
             else:
-                attempt = CourseTaskAttemps.query.get(form.id.data)
-                attempt.comments = form.comments.data
-                attempt.attachments = fileatt.id if fileatt else None
-                attempt.grade = form.grade.data
+                attempt = CourseTaskAttemps.query.filter_by(id=form.id.data).first()
+                if current_user.profile in ['admin', 'staff']:
+                    attempt.grade = form.grade.data
+                else:
+                    attempt.comments = form.comments.data
+                    attempt.attachment = fileatt.id if fileatt else attempt.attachment
             db.session.add(attempt)
             db.session.commit()
             task = CourseTasks.query.filter_by(id=form.task_id.data).first()
             form.id.data = attempt.id
-
+        else:
+            flash('Error en el formulario')
+            return redirect(url_for('module003.module003_attempt'))
     elif ('taskid' in request.args):
         attempt = CourseTaskAttemps.query.filter_by(task_id=request.args['taskid']).first()
         task = CourseTasks.query.filter_by(id=request.args['taskid']).first()
-        course = Course.query.filter_by(id=task.course_id).first()
-        if not task or not course or course.user_id != current_user.id:#TODO: checar que si es usuario hace follow
-            flash('Error retrieving data for the task {}'.format(request.args['taskid']))
+        if not task or not task.course_id in courses_ids:
+            flash('Error retrieving data for the attempt {}'.format(request.args['taskid']))
             return redirect(url_for('module003.module003_tasks'))
         else:
             if(attempt):

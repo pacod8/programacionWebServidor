@@ -145,12 +145,16 @@ def download_userfile():
         has_access = True
 
     query = db.session.query(User, Follow, Course).select_from(User).join(Follow).join(Course).all()
-    print(query)
-
+    for item in query:
+        if item[2].user_id == current_user.id:
+            has_access = True
+            break
 
     if(has_access):
         return send_file(os.path.join(app.config['UPLOADS_FOLDER'], file.filename),
          mimetype=file.filetype, as_attachment=True, attachment_filename=file.filename)
+    else: 
+        return render_template("404.html"), 404
         
 
 

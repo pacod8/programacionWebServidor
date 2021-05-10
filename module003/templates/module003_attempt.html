@@ -29,9 +29,9 @@
           <tbody>
             {% for row in rows %}
             <tr>
-              <td> <a><form action="{{url_for('module003.module003_tasks')}}" method="GET">
-                <input type="hidden" value={{ row.id }} name="rowid">
-                <input type="submit" value="Review Attempt" name="rowid">
+              <td> <a><form action="{{url_for('module003.module003_attempt_detail')}}" method="GET">
+                <input type="hidden" value={{ row.task_id }} name="taskid">
+                <input type="submit" value="Review Attempt">
               </form> </a></td>
               <td><a><form action="/tasks" method="GET">
                <input type="hidden" value={{ row.task_id }} name="rowid">

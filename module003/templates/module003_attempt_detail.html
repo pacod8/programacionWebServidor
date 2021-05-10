@@ -8,9 +8,15 @@
         {{ wtf.form_field(form.id,readonly="readonly") }}
         {{ wtf.form_field(form.task_id,readonly="readonly") }}
         {{ wtf.form_field(form.user_id,readonly="readonly") }}
+
+        {% if current_user.profile in ('staff', 'admin') %}
+        {{ wtf.form_field(form.comments,readonly="readonly") }}
+        {{ wtf.form_field(form.grade) }}
+        {% else %}
         {{ wtf.form_field(form.comments) }}
         {{ wtf.form_field(form.attachment) }}
         {{ wtf.form_field(form.grade,readonly="readonly") }}
+        {% endif %}
 
        <button class="btn btn-lg btn-primary btn-block" type="submit"> Create or Update attempt </button>
        </form>
