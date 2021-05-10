@@ -36,7 +36,7 @@ def get_user_courses(user):
 def module003_tasks():
     form = TaskForm()
     courses = get_user_courses(current_user)
-    courses_ids = map(lambda x: x.id, courses)
+    courses_ids = list(map(lambda x: x.id, courses))
     #tasks = CourseTasks.query.filter(CourseTasks.course_id.in_(list(map(lambda x: x.id, courses))))
     for course in courses:
         form.course_id.choices += [(course.id,  str(course.id) + ' - ' + course.institution_name + ' - ' + course.name)]
@@ -44,12 +44,19 @@ def module003_tasks():
     if request.method == 'POST' and current_user.profile != 'student':
         if form.validate_on_submit():
             if not form.id.data:
+
+                print(form.course_id.data)
+                print(courses_ids)
+                if not int(form.course_id.data) in courses_ids:
+                    flash("El curso no es de su propiedad")
+                    return redirect(url_for('module003.module003_tasks'))
                 task = CourseTasks(name=form.name.data.strip(),
                             description=form.description.data.strip(),
                             course_id=form.course_id.data,
                             date_limit=form.date_limit.data )
                 db.session.add(task)
                 db.session.commit()
+                form.id.data = task.id
                 try:
                     db.session.commit()
                     flash("Task created successfully")
@@ -97,7 +104,9 @@ def module003_tasks():
             flash('Error retrieving data for the task {}'.format(request.args['rowid']))
         else:
             form = TaskForm(id=task.id, name=task.name, description=task.description, course_id= task.course_id, date_limit=task.date_limit)
-
+            for course in courses:
+                form.course_id.choices += [(course.id,  str(course.id) + ' - ' + course.institution_name + ' - ' + course.name)]
+    
     tasks = CourseTasks.query.filter(CourseTasks.course_id.in_(list(map(lambda x: x.id, courses)))).order_by(CourseTasks.course_id).all()
     if len(courses) != 0:
         for t in tasks:
@@ -111,7 +120,7 @@ def module003_tasks():
 def module003_attempt():
     filter_form = TaskAttemptFilterForm()
     courses = get_user_courses(current_user)
-    courses_ids = map(lambda x: x.id, courses)
+    courses_ids = list(map(lambda x: x.id, courses))
     filter_courses = list(map(lambda x: x.id, courses))
 
     tasks = CourseTasks.query.filter(CourseTasks.course_id.in_(filter_courses))
@@ -139,7 +148,7 @@ def module003_attempt():
 def module003_attempt_detail(): #TODO checar si la tarea esta en un curso que siga el usuario
     form = TaskAttemptForm()
     courses = get_user_courses(current_user)
-    courses_ids = map(lambda x: x.id, courses)
+    courses_ids = list(map(lambda x: x.id, courses))
 
     if request.method == 'POST':
         if form.validate_on_submit():
