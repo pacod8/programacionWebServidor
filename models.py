@@ -118,6 +118,7 @@ class CourseTaskAttemps(UserMixin, db.Model):
 
 class UserFile(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     filetype = db.Column(db.String(50))
     filename = db.Column(db.String(50))
 

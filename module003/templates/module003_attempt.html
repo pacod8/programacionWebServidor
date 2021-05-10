@@ -2,7 +2,57 @@
 
 {% block main %}
     <div class="container">
-      hola
+      <form method="POST">
+        <h2 class="form-signin-heading"> Filtro </h2>
+        {{ filter_form.hidden_tag() }}
+        {{ wtf.form_field(filter_form.task) }}
+        {{ wtf.form_field(filter_form.submit) }}
+      </form>
+
+
+    <br>
+      <div class="table-responsive">
+        <table id="myTable" class="table table-striped">
+          <thead>
+            <tr>
+              <th>Edit</th>
+              <th>Task</th>
+              <th>User</th>
+              <th>Comments</th>
+              <th>Attachment</th>
+              <th>Grade</th>
+              <th>Date Created</th>
+              <th>Date Modified</th>
+
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in rows %}
+            <tr>
+              <td> <a><form action="{{url_for('module003.module003_attempt_detail')}}" method="GET">
+                <input type="hidden" value={{ row.task_id }} name="taskid">
+                <input type="submit" value="Review Attempt">
+              </form> </a></td>
+              <td><a><form action="/tasks" method="GET">
+               <input type="hidden" value={{ row.task_id }} name="rowid">
+               <input type="submit" value="{{ row.task_name }}" name="taskname">
+               </form> </a></td>
+               <td> <a><form action="/profile" method="GET">
+                <input type="submit" value={{ row.user_id }} name="rowid">
+              </form> </a></td>
+               <td>{{ row.comments }}</td>
+
+               <td>{{ row.attachment }}</td>
+               <td>{{ row.grade }}</td>
+               
+               <td>{{ row.date_created }}</td>
+               <td>{{ row.date_modified }}</td>
+
+           </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
     </div>
 
 {% endblock %}

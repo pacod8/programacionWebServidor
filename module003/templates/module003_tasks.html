@@ -2,8 +2,9 @@
 
 {% block main %}
     <div class="container">
+      <h2 class="form-signin-heading"> Tasks </h2>
+      {% if current_user.profile in ('admin', 'staff') %}
       <form class="form-signin" method="POST" action="{{url_for('module003.module003_tasks')}}">
-        <h2 class="form-signin-heading"> Tasks </h2>
         {{ form.hidden_tag() }}
     	{{ wtf.form_field(form.id,readonly="readonly") }}
     	{{ wtf.form_field(form.name) }}
@@ -13,6 +14,7 @@
 
        <button class="btn btn-lg btn-primary btn-block" type="submit"> Create or Update library </button>
        </form>
+       {% endif %}
 
     <br>
       <div class="table-responsive">
@@ -47,10 +49,18 @@
                 <td>{{ row.description }}</td>
 
                 <td>{{ row.date_limit }}</td>
-                <td><a><form action="" method="GET">
-                  <input type="hidden" value={{ row.id }} name="rowid">
-                  <input type="submit" value="View Attempts" name="taskattempts">
+                {% if current_user.profile in ('admin', 'staff') %}
+                <td><a><form action="/tasks/attempt" method="POST">
+                  <input type="hidden" value={{ row.id }} name="task">
+                  <input type="submit" value="View Attempts">
                 </form> </a></td>
+                {% else %}
+                <td><a><form action="/tasks/attempt-detail" method="GET">
+                  <input type="hidden" value={{ row.id }} name="taskid">
+                  <input type="submit" value="My attempt">
+                </form> </a></td>
+                {% endif %}
+                
                 <td>{{ row.date_created }}</td>
                 <td>{{ row.date_modified }}</td>
 

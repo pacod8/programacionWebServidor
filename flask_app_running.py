@@ -19,7 +19,7 @@ from module003.module003 import module003
 
 app.register_blueprint(module001, url_prefix="/course")
 app.register_blueprint(module002, url_prefix="/module002")
-app.register_blueprint(module003, url_prefix="/module003")
+app.register_blueprint(module003, url_prefix="/tasks")
 
 # CONFIG- START
 app.config['SECRET_KEY'] = configuration['SECRET_KEY']
@@ -41,6 +41,7 @@ app.config['FLASKY_MAIL_SUBJECT_PREFIX'] = '[Aula Virtual] '
 app.config['FLASKY_MAIL_SENDER'] = 'Prof. Manoel Gadi'
 app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
 app.config['UPLOAD_EXTENSIONS'] = ['.zip', '.pdf', '.doc', '.docx', '.png', '.jpg']
+app.config['UPLOADS_FOLDER'] = "uploads/"
 
 from mail import init_mail
 mail = init_mail(app)
