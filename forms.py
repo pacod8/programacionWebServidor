@@ -2,6 +2,8 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField
 from wtforms.validators import InputRequired, Length, Email, EqualTo
 
+
+
 class RecoverPasswordForm(FlaskForm): # class RegisterForm extends FlaskForm
   email = StringField('Email',validators=[InputRequired(),Length(max=50),Email(message='Invalid email')])
   password = PasswordField('Password',validators=[InputRequired(),Length(min=6,max=80)])
@@ -27,3 +29,6 @@ class ProfileForm(FlaskForm): # class RegisterForm extends FlaskForm
     email = StringField('Email')
     username = StringField('User Name')
     profile = StringField('Profile')
+
+
+
