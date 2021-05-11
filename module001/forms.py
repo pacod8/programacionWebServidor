@@ -24,3 +24,6 @@ class ParticipationCodeForm(FlaskForm): # class RegisterForm extends FlaskForm
     never_expire = BooleanField('Never expire')
     date_expire = DateField('Choose an expiring date',format='%Y-%m-%d', default=datetime.datetime.today)
     time_expire = TimeField('Expiring time',format='%H:%M', default=datetime.time(23, 59))
+
+class ParticipationRedeemForm(FlaskForm): # class RegisterForm extends FlaskForm
+    code = StringField('Enter the code you wish to redeem', validators = [InputRequired()])

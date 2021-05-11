@@ -3,6 +3,7 @@ from flask_login import login_required, current_user
 from sqlalchemy import or_, and_
 from models import get_db, User, Course, Follow, ParticipationCode, ParticipationRedeem
 import random
+import datetime
 
 from module001.forms import *
 
@@ -87,15 +88,15 @@ def module001_sharing_details():
         if not course or course.user_id != current_user.id:
             flash("An error has occurred retrieving details for the activity")
             return redirect(url_for('module001.module001_course'))
-        qr.add_data("http://{}/follow?sharedlink=1&code={}".format(base_url,course.code))
+        qr.add_data("http://{}/course/follow?sharedlink=1&code={}".format(base_url,course.code))
         module,itemtype,item="library","course",course
-#    else:
-#        participation = ParticipationCode.query.get(request.args.get('rowid'))
-#        if not participation or participation.user_id != current_user.id:
-#            flash("An error has occurred retrieving details for the participation")
-#            return redirect(url_for('module001.module001_participation_generate'))
-#        qr.add_data("http://{}/participation_redeem?sharedlink=1&code={}".format(base_url,participation.code))
-#        module,itemtype,item="participation_gerenate","participation",participation
+    else:
+        participation = ParticipationCode.query.get(request.args.get('rowid'))
+        if not participation or participation.user_id != current_user.id:
+            flash("An error has occurred retrieving details for the participation")
+            return redirect(url_for('module001.module001_participation_generate'))
+        qr.add_data("http://{}/course/participation_redeem?sharedlink=1&code={}".format(base_url,participation.code))
+        module,itemtype,item="participation_gerenate","participation",participation
     try:
         qr.make() # Generate the QRCode itself
         im = qr.make_image()
@@ -275,6 +276,89 @@ def module001_participation_generate():
     for course in Course.query.filter_by(user_id=current_user.id):
         form.course_id.choices += [(course.id,  str(course.id) + ' - ' + course.institution_name + ' - ' + course.name)]
     return render_template('module001_participation_generate.html',module="module001", form=form, rows=participations)
+
+@module001.route('/participation_redeem',methods=['GET','POST'])
+@login_required
+def module001_participation_redeem():
+    form = ParticipationRedeemForm()
+    unfollow=False
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            code = form.code.data.strip()
+            participation = ParticipationCode.query.filter_by(code=code).first()
+            if not participation:
+                flash('Invalid code')
+                return redirect(url_for('module001.module001_participation_redeem'))
+
+            redeem = ParticipationRedeem.query.filter(ParticipationRedeem.participation_code == code,
+                                             ParticipationRedeem.user_id == current_user.id).first()
+            if redeem:
+                flash("You have already redeemed this code")
+                return redirect(url_for('module001.module001_participation_redeem'))
+            participation = ParticipationCode.query.filter(ParticipationCode.code==code,
+                                                           or_(ParticipationCode.date_expire == None,
+                                                               ParticipationCode.date_expire > datetime.datetime.now())).first()
+            if not participation:
+                flash('Participation code is expired')
+                return redirect(url_for('module001.module001_participation_redeem'))
+
+            follow = Follow.query.filter(Follow.course_id==participation.course_id,
+                                         Follow.user_id==current_user.id).first()
+            if not follow:
+                flash('You are not following this course. Ask the course code for the professor and follow the course before redeeming any participation.')
+            else:
+                course = Course.query.get(participation.course_id)
+                redeem = ParticipationRedeem(
+                        participation_code = participation.code,
+                        code_description = participation.code_description,
+                        user_id = current_user.id,
+                        course_id = course.id,
+                        course_name = course.name,
+                        institution_name = course.institution_name)
+                db.session.add(redeem)
+                db.session.commit()
+                flash("Participation code {} redeemed successfully".format(participation.code))
+                return redirect(url_for('module001.module001_participation_redeem'))
+    elif ('sharedlink' in request.args):
+        form=FollowForm(code=request.args.get('code'))
+    elif ('rowid' in request.args):
+        participation = ParticipationRedeem.query.get(request.args.get('rowid'))
+        if participation:
+            if participation.user_id != current_user.id:
+                flash("User not authorised for this content")
+            else:
+                form = ParticipationRedeemForm(code=participation.participation_code)
+        unfollow=True
+    participations = ParticipationRedeem.query.filter(ParticipationRedeem.user_id==current_user.id)
+    return render_template('module001_participation_redeem.html',module="participation_redeem", form=form, rows=participations,unfollow=unfollow)
+
+@module001.route('/participation_redeem_delete',methods=['POST','GET'])
+@login_required
+def module001_participation_redeem_delete():
+    form = ParticipationRedeemForm()
+    if request.method == 'POST':
+        if form.validate_on_submit():
+            code = form.code.data.strip()
+            redeem = ParticipationRedeem.query.filter(ParticipationRedeem.participation_code == code,
+                                             ParticipationRedeem.user_id == current_user.id).first()
+            if redeem:
+                participation_code = redeem.participation_code
+                db.session.delete(redeem)
+                db.session.commit()
+                flash("Code {} has been removed, you can always redeem again if you are still within the deadline".format(participation_code))
+                return redirect(url_for('module001.module001_participation_redeem'))
+    else:
+        redeem = ParticipationRedeem.query.filter(ParticipationRedeem.participation_code == request.args.get('participation_code'),
+                                         ParticipationRedeem.user_id == request.args.get('used_id')).first()
+        if redeem:
+            participation_code = redeem.participation_code
+            db.session.delete(redeem)
+            db.session.commit()
+            flash("Code {} has been removed from user {}, user can always redeem again if still within the deadline (extending the deadlines works)".format(participation_code,request.args.get('used_id')))
+            return redirect(url_for('module001.module001_participation_generate'))
+
+    flash('Something unusual happened, please try again later')
+    return redirect(url_for('module001.module001_participation_redeem'))
 
 
 
