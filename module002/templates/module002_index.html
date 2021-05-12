@@ -1,18 +1,28 @@
 {% extends "base.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
-{% import "_macros.html" as macros %}
 
-{% block title %}Flasky - Post{% endblock %}
+{% block content %}
 
-{% block page_content %}
-{% include '_posts.html' %}
-<h4 id="comments">Comments</h4>
-<div class="comment-form">
+<div class="container">
+    {%for post in posts %}
+        <h4 class="h4">{{usernames[loop.index0].username}}</h4>
+        <h6 class = "h6">{{post.date_created}}:</h6>
+
+
+        <blockquote class="blockquote text-center">
+            <p>{{post.post}}</p>
+        </blockquote>
+
+    {% endfor %}
+
+    <form class="form-signin" methods=["POST", "GET"] action="{{url_for('module002.module002_index')}}">
+        <h2 class="form-signin-heading"> Post </h2>
+
+    </form>
     {{ wtf.quick_form(form) }}
 </div>
-{% if pagination %}
-<div class="pagination">
-    <!--{{ macros.pagination_widget(pagination, '.post', fragment='#comments', id=posts[0].id) }}-->
-</div>
-{% endif %}
+
+
+
+
 {% endblock %}
