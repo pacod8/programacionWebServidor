@@ -94,6 +94,7 @@ python-dateutil==2.8.1
 python-editor==1.0.4
 pytz==2020.4
 pyzmq==21.0.0
+qrcode==6.1
 requests==2.25.0
 Send2Trash==1.5.0
 six==1.15.0
