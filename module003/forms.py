@@ -1,9 +1,11 @@
+import datetime
+from decimal import *
+
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField
 from wtforms import StringField, BooleanField, DateTimeField, SelectField, HiddenField, TextAreaField, SubmitField #, DateField
 from wtforms.validators import InputRequired, Length, Optional, ValidationError
 from wtforms.fields.html5 import DateField, TimeField, DateTimeLocalField, DecimalField
-import datetime
 
 
 class TaskForm(FlaskForm): # class RegisterForm extends FlaskForm
@@ -22,8 +24,9 @@ def grades_validator():
 
     def _validator(form, field):
         l = field.data
-        if l < 0 or l > 10:
-            raise ValidationError(message)
+        if l != None:
+            if not type(l) in [float, int, Decimal] or l < 0 or l > 10 :
+                raise ValidationError(message)
 
     return _validator
 
@@ -33,4 +36,4 @@ class TaskAttemptForm(FlaskForm): # class RegisterForm extends FlaskForm
     user_id = StringField('user_id')
     comments = TextAreaField('Comments')
     attachment = FileField('Attachment')
-    grade = DecimalField('Grade', validators=[grades_validator()])
+    grade = DecimalField('Grade', validators=[Optional(), grades_validator()])
