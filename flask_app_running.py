@@ -17,9 +17,9 @@ from module001.views import module001 as module001_blueprint
 from module002.views import module002 as module002_blueprint
 from module003.views import module003 as module003_blueprint
 
-app.register_blueprint(module001, url_prefix="/course")
-app.register_blueprint(module002, url_prefix="/board")
-app.register_blueprint(module003, url_prefix="/tasks")
+app.register_blueprint(module001_blueprint, url_prefix="/course")
+app.register_blueprint(module002_blueprint, url_prefix="/board")
+app.register_blueprint(module003_blueprint, url_prefix="/tasks")
 
 
 # CONFIG- START
@@ -74,4 +74,3 @@ import views
 
 if __name__ == '__main__':
     manager.run()
-
