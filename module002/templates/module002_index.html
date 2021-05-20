@@ -3,26 +3,24 @@
 
 {% block content %}
 
-<div class="container">
-    {%for post in posts %}
-        <h4 class="h4">{{usernames[loop.index0].username}}</h4>
-        <h6 class = "h6">{{post.date_created}}:</h6>
+<div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+          <ul class="nav nav-sidebar">
+            <li><a href={{url_for('module002.module002_index')}}>Home</a></li>
+            {%if cursos %}
+                {%for curso in cursos %}
+
+                    <li><a href="/board/post?id={{curso.course_code}}">{{curso.course_name}}</a></li>
+
+                {% endfor %}
+            {% endif %}
 
 
-        <blockquote class="blockquote text-center">
-            <p>{{post.post}}</p>
-        </blockquote>
-
-    {% endfor %}
-
-    <form class="form-signin" methods=["POST", "GET"] action="{{url_for('module002.module002_index')}}">
-        <h2 class="form-signin-heading"> Post </h2>
-
-    </form>
-    {{ wtf.quick_form(form) }}
-</div>
-
-
+          </ul>
+        </div>
+      </div>
+    </div>
 
 
 {% endblock %}

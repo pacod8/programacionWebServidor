@@ -21,7 +21,7 @@
 
               {% if current_user.profile in ('admin','staff','student') %}
                   <li class={% if module=='module001' %}"active"{%else%}""{%endif%}><a href="/course">Course</a></li>
-                  <li class={% if module=='module002' %}"active"{%else%}""{%endif%}><a href="/module002">Posts</a></li>
+                  <li class={% if module=='module002' %}"active"{%else%}""{%endif%}><a href="/board">Posts</a></li>
               {% endif %}
 
               {% if current_user.profile in ('admin','staff','student') %}

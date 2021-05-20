@@ -129,6 +129,7 @@ class PostComments (UserMixin, db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     post = db.Column(db.String(4000), nullable=False)
     date_created  = db.Column(db.DateTime,  default=db.func.current_timestamp())
+    course_code = db.Column(db.String(50))
 
 
 
