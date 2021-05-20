@@ -11,6 +11,7 @@
               <li><a href={{url_for('module001.module001_course')}}>Create</a></li>
               <li><a href={{url_for('module001.module001_follow')}}>Following</a></li>
               <li><a href={{url_for('module001.module001_participation_generate')}}>Participation</a></li>
+              <li><a href={{url_for('module001.module001_participation_redeem')}}>Redeemed</a></li>
           </ul>
         </div>
       </div>
@@ -33,8 +34,8 @@
             <h2> {{ item.code_description }} </h2>
              <ul>
               <li>Code: {{ item.code }}
-              (redeem by entering the code here: <a href="http://{{base_url}}/participation_redeem" target="_blank">http://{{base_url}}/participation_redeem</a>)</li>
-              <li>Direct link: <a href="http://{{base_url}}/participation_redeem?sharedlink=1&code={{item.code}}" target="_blank">http://{{base_url}}/participation_redeem?sharedlink=1&code={{ item.code }}</a></li>
+              (redeem by entering the code here: <a href="http://{{base_url}}/course/participation_redeem" target="_blank">http://{{base_url}}/course/participation_redeem</a>)</li>
+              <li>Direct link: <a href="http://{{base_url}}/course/participation_redeem?sharedlink=1&code={{item.code}}" target="_blank">http://{{base_url}}/course/participation_redeem?sharedlink=1&code={{ item.code }}</a></li>
               {% if filename %}
                   <li><img  src={{filename}} alt="" style="width: 40%; height: auto;"></li>
               {% endif %}

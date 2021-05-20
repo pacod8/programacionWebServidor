@@ -13,13 +13,14 @@ app = init_app(__name__)
 
 #from paquete.codigo import objeto
 #from carperta.codigopython import objeto
-from module001.module001 import module001
-from module002.module002 import module002
-from module003.module003 import module003
+from module001.views import module001 as module001_blueprint
+from module002.views import module002 as module002_blueprint
+from module003.views import module003 as module003_blueprint
 
 app.register_blueprint(module001, url_prefix="/course")
 app.register_blueprint(module002, url_prefix="/board")
 app.register_blueprint(module003, url_prefix="/tasks")
+
 
 # CONFIG- START
 app.config['SECRET_KEY'] = configuration['SECRET_KEY']
