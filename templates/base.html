@@ -9,7 +9,7 @@
       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>  </head>
   <body>
     <nav class="navbar navbar-default">
-      <div class="container-fluid">
+      <div class="container-fluid" style="display:flex; flex-direction:row">
         <div class="navbar-header">
           <a class="navbar-brand" href="/">U-TAD</a>
         </div>
@@ -38,6 +38,11 @@
               <li class={% if module=='signup' %}"active"{%else%}""{%endif%}><a href={{url_for('signup')}}>Sign Up</a></li>
         {% endif %}
 
+        </ul>
+        <ul class="nav navbar-nav" style="flex-grow: 1;display:flex; align-items:end;justify-content:end">
+          <li style="flex-grow:1; display:flex;align-items:end;">
+            <a style="flex-grow:1;text-align:right">{{current_user.username}} - {{current_user.profile}}</a>
+          </li>
         </ul>
       </div>
     </nav>
