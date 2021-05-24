@@ -122,7 +122,7 @@ def module003_tasks():
 def module003_attempt():
     filter_form = TaskAttemptFilterForm()
     courses = get_user_courses(current_user)
-    courses_ids = list(map(lambda x: x.id, courses))
+    #courses_ids = list(map(lambda x: x.id, courses))
     filter_courses = list(map(lambda x: x.id, courses))
 
     tasks = CourseTasks.query.filter(CourseTasks.course_id.in_(filter_courses))
@@ -134,10 +134,9 @@ def module003_attempt():
 
     if request.method == 'POST':
         if filter_form.validate_on_submit():
-            filter_courses = [filter_form.task.data] if int(filter_form.task.data) != -1 else filter_task
+            filter_task = [filter_form.task.data] if int(filter_form.task.data) != -1 else filter_task
 
-    elif ('rowid' in request.args):
-        pass
+
 
     attempts = CourseTaskAttemps.query.filter(CourseTaskAttemps.task_id.in_(filter_task))
 
@@ -149,7 +148,7 @@ def module003_attempt():
 
 @module003.route('/attempt-detail', methods=['GET', 'POST'])
 @login_required
-def module003_attempt_detail(): #TODO checar si la tarea esta en un curso que siga el usuario
+def module003_attempt_detail():
     form = TaskAttemptForm()
     courses = get_user_courses(current_user)
     courses_ids = list(map(lambda x: x.id, courses))
