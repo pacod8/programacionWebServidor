@@ -138,11 +138,12 @@ def module003_attempt():
 
 
 
-    attempts = CourseTaskAttemps.query.filter(CourseTaskAttemps.task_id.in_(filter_task))
+    attempts = CourseTaskAttemps.query.filter(CourseTaskAttemps.task_id.in_(filter_task)).all()
 
     for a in attempts:
         task = list(filter(lambda x: x.id == a.task_id, tasks))[0]
-        a.task_name = task.name
+        print(task.name)
+        a.task_name = str(task.name)
     return render_template("module003_attempt.html", module='module003', filter_form=filter_form, rows=attempts)
 
 
