@@ -5,6 +5,7 @@ from flask_wtf import FlaskForm
 from flask_wtf.file import FileField
 from wtforms import StringField, BooleanField, DateTimeField, SelectField, HiddenField, TextAreaField, SubmitField #, DateField
 from wtforms.validators import InputRequired, Length, Optional, ValidationError
+from wtforms.fields import DateTimeField
 from wtforms.fields.html5 import DateField, TimeField, DateTimeLocalField, DecimalField
 
 
@@ -13,7 +14,7 @@ class TaskForm(FlaskForm): # class RegisterForm extends FlaskForm
     name = StringField('Task Name',validators=[InputRequired(),Length(min=1,max=50)])
     description = TextAreaField('Task Description',validators=[InputRequired(),Length(min=1,max=4000)])
     course_id = SelectField('Course', choices = [], validators = [InputRequired()])
-    date_limit = DateTimeLocalField('Choose an expiring date',format='%Y/%m/%d %H:%M', default=datetime.datetime.today)
+    date_limit = DateTimeField('Choose an expiring date',format='%Y/%m/%d %H:%M', default=datetime.datetime.today)
 
 class TaskAttemptFilterForm(FlaskForm): # class RegisterForm extends FlaskForm
     task = SelectField('Task', choices = [(-1, "Todas las tareas")], validators = [InputRequired()], default=-1)
