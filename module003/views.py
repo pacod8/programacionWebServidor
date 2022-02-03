@@ -1,8 +1,7 @@
 from flask import Blueprint, render_template, abort, flash, redirect, url_for, request, current_app
 from flask_login import login_required, current_user
 from sqlalchemy import or_, and_
-from models import get_db, User, Course, Follow, ParticipationCode, ParticipationRedeem, CourseTasks, CourseTaskAttemps, UserFile
-import random
+from models import get_db, User, Course, Follow, CourseTasks, CourseTaskAttemps, UserFile
 from werkzeug.utils import secure_filename
 import os
 import uuid
@@ -28,15 +27,14 @@ def get_user_courses(user):
         follows = map(lambda x: x.course_id, Follow.query.filter_by(user_id=user.id).all())
         courses = Course.query.filter(Course.id.in_(follows)).all()
 
-    return courses
+    return courses, list(map(lambda x: x.id, courses))
 
 
 @module003.route('/tasks', methods=['GET', 'POST'])
 @login_required
 def module003_tasks():
     form = TaskForm()
-    courses = get_user_courses(current_user)
-    courses_ids = list(map(lambda x: x.id, courses))
+    courses, courses_ids = get_user_courses(current_user)
     #tasks = CourseTasks.query.filter(CourseTasks.course_id.in_(list(map(lambda x: x.id, courses))))
     for course in courses:
         form.course_id.choices += [(str(course.id),  str(course.id) + ' - ' + course.institution_name + ' - ' + course.name)]
@@ -44,9 +42,6 @@ def module003_tasks():
     if request.method == 'POST' and current_user.profile != 'student':
         if form.validate_on_submit():
             if not form.id.data:
-
-                print(form.course_id.data)
-                print(courses_ids)
                 if not int(form.course_id.data) in courses_ids:
                     flash("El curso no es de su propiedad")
                     return redirect(url_for('module003.module003_tasks'))
@@ -57,12 +52,7 @@ def module003_tasks():
                 db.session.add(task)
                 db.session.commit()
                 form.id.data = task.id
-                try:
-                    db.session.commit()
-                    flash("Task created successfully")
-                except:
-                    db.session.rollback()
-                    flash("Error creating task!")
+               
             else:
                 change = 0
                 task = CourseTasks.query.get(form.id.data)
@@ -121,9 +111,8 @@ def module003_tasks():
 @login_required
 def module003_attempt():
     filter_form = TaskAttemptFilterForm()
-    courses = get_user_courses(current_user)
+    courses, filter_courses = get_user_courses(current_user)
     #courses_ids = list(map(lambda x: x.id, courses))
-    filter_courses = list(map(lambda x: x.id, courses))
 
     tasks = CourseTasks.query.filter(CourseTasks.course_id.in_(filter_courses))
     filter_task = list(map(lambda x: x.id, tasks))
@@ -151,8 +140,7 @@ def module003_attempt():
 @login_required
 def module003_attempt_detail():
     form = TaskAttemptForm()
-    courses = get_user_courses(current_user)
-    courses_ids = list(map(lambda x: x.id, courses))
+    courses, courses_ids = get_user_courses(current_user)
 
     if request.method == 'POST':
         if form.validate_on_submit():
